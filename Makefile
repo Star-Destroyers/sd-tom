@@ -1,5 +1,5 @@
 serve:
-	python sdtom/manage.py runserver
+	python3 manage.py runserver
 
 shell:
-	python sdtom/manage.py shell_plus
+	python3 manage.py shell_plus

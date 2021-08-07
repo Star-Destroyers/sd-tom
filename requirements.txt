@@ -1,1 +1,3 @@
 git+https://github.com/TOMToolkit/tom_base.git
+gunicorn
+django-heroku
