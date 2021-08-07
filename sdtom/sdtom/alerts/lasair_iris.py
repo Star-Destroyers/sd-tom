@@ -2,7 +2,7 @@ from tom_alerts.alerts import GenericQueryForm, GenericAlert, GenericBroker
 from tom_targets.models import Target
 from django import forms
 from django.conf import settings
-from typing import List
+from typing import Iterator
 import requests
 
 LASAIR_IRIS_URL = 'https://lasair-iris.roe.ac.uk'
@@ -27,7 +27,7 @@ class LasairIrisBroker(GenericBroker):
         else:
             self.headers = {}
 
-    def fetch_alerts(self, parameters: dict) -> List[dict]:
+    def fetch_alerts(self, parameters: dict) -> Iterator[dict]:
         """
         Fetches a list of results from a Lasair stored query
         """
