@@ -27,7 +27,8 @@ def sparkline(target, height, spacing=5, color_map=None):
             'r': (0, 0, 255)
         }
 
-    vals = list(target.reduceddatum_set.all().order_by('timestamp').values_list('value'))
+    vals = list(reversed(target.reduceddatum_set.all().order_by('-timestamp').values_list('value')[:30]))
+    # TODO place in actual day buckets
     if len(vals) < 1:
         return {'sparkline': None}
 
