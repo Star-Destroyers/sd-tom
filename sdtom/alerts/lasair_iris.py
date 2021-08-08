@@ -4,8 +4,23 @@ from django import forms
 from django.conf import settings
 from typing import Iterator
 import requests
+from dataclasses import dataclass
 
 LASAIR_IRIS_URL = 'https://lasair-iris.roe.ac.uk'
+
+
+@dataclass
+class LasairIrisGenericAlert(GenericAlert):
+    classification: str
+
+    def to_target(self):
+        return Target(
+            name=self.name,
+            type='SIDEREAL',
+            ra=self.ra,
+            dec=self.dec,
+
+        ), {'classification': self.classification}, []
 
 
 class LasairIrisBrokerForm(GenericQueryForm):
@@ -55,9 +70,9 @@ class LasairIrisBroker(GenericBroker):
     def process_reduced_data(self, target, alert=None):
         pass
 
-    def to_generic_alert(self, alert: dict) -> GenericAlert:
+    def to_generic_alert(self, alert: dict) -> LasairIrisGenericAlert:
         score = 1 if alert['score'] == 'Within 2arcsec of PS1 star' else 0
-        return GenericAlert(
+        return LasairIrisGenericAlert(
             url=LASAIR_IRIS_URL + '/object/' + alert['objectId'],
             id=alert['objectId'],
             name=alert['objectId'],
@@ -65,13 +80,16 @@ class LasairIrisBroker(GenericBroker):
             dec=alert['decmean'],
             timestamp=alert['UTC'],
             mag=alert['rmag'],
-            score=score
+            score=score,
+            classification=alert['classification']
         )
 
     def to_target(self, alert):
-        return Target.objects.create(
+        alert = self.fetch_alert(alert['objectId'])
+        target = Target(
             name=alert['objectId'],
             type='SIDEREAL',
             ra=alert['ramean'],
             dec=alert['decmean'],
         )
+        target.save(extras={'classification': alert['classification']})
