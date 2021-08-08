@@ -1,3 +1,4 @@
 git+https://github.com/Star-Destroyers/tom_base.git@feature/target_list_block
 gunicorn
 django-heroku
+ipython
