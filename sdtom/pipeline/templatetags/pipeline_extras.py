@@ -2,6 +2,9 @@ from PIL import Image, ImageDraw
 from io import BytesIO
 import base64
 from django import template
+from datetime import datetime, timedelta
+from django.utils import timezone
+import pytz
 
 register = template.Library()
 
@@ -27,26 +30,38 @@ def sparkline(target, height, spacing=5, color_map=None):
             'r': (0, 0, 255)
         }
 
-    vals = list(reversed(target.reduceddatum_set.all().order_by('-timestamp').values_list('value')[:30]))
-    # TODO place in actual day buckets
+    vals = target.reduceddatum_set.filter(
+        timestamp__gte=datetime.utcnow() - timedelta(days=32)
+    ).values('value', 'timestamp')
+
     if len(vals) < 1:
         return {'sparkline': None}
 
-    min_mag = min([val[0]['magnitude'] for val in vals])
-    max_mag = max([val[0]['magnitude'] for val in vals])
+    min_mag = min([val['value']['magnitude'] for val in vals])
+    max_mag = max([val['value']['magnitude'] for val in vals])
+
+    distinct_filters = set([val['value']['filter'] for val in vals])
+    by_filter = {f: [None] * 32 for f in distinct_filters}
+
+    for val in vals:
+        day_index = (val['timestamp'].replace(tzinfo=pytz.UTC) - timezone.now()).days
+        by_filter[val['value']['filter']][day_index] = val['value']['magnitude']
+
     val_range = max_mag - min_mag
     pixels_per_unit = height / val_range
-    image_width = (spacing + 1) * (len(vals) - 1)
+    image_width = (spacing + 1) * (32 - 1)
     image_height = height + 10
 
     image = Image.new("RGBA", (image_width, image_height), (255, 255, 255, 0))
     d = ImageDraw.Draw(image)
-    x = 0
-    for val in vals:
-        color = color_map.get(val[0]['filter'], 'r')
-        y = ((val[0]['magnitude'] - min_mag) * pixels_per_unit)
-        draw_point(d, x, y, color)
-        x += spacing
+    for d_filter, day_mags in by_filter.items():
+        x = 0
+        color = color_map.get(d_filter, 'r')
+        for mag in day_mags:
+            if mag:
+                y = ((mag - min_mag) * pixels_per_unit)
+                draw_point(d, x, y, color)
+            x += spacing
 
     data_uri = pil2datauri(image)
     return {'sparkline': data_uri}
