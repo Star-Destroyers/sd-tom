@@ -11,7 +11,6 @@ def draw_point(draw, x, y, color):
 
 
 def pil2datauri(img):
-    print('fucky')
     # converts PIL image to datauri
     data = BytesIO()
     img.save(data, "PNG")
@@ -19,7 +18,7 @@ def pil2datauri(img):
     return u'data:img/png;base64,' + data64.decode('utf-8')
 
 
-@register.inclusion_tag('tom_dataproducts/partials/sparkline.html')
+@register.inclusion_tag('pipeline/partials/sparkline.html')
 def sparkline(target, height, spacing=5, color_map=None):
     if not color_map:
         color_map = {
