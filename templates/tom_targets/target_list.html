@@ -28,7 +28,7 @@
     <form id="grouping-form" action="{% url 'targets:add-remove-grouping' %}" method="POST">
       {% csrf_token %}
       <div class="form-group d-flex justify-content-end align-items-baseline">
-        <label>Add/Remove from grouping</label>
+        <label>Add/remove or move to group</label>
         <select name="grouping" class="form-control w-25 ml-1">
           {% for grouping in groupings %}
           <option value="{{ grouping.id }}">{{ grouping.name }}</option>
@@ -37,6 +37,7 @@
         <input type="hidden" value="{{ query_string }}" name="query_string">
         <input type="hidden" value="False" id="isSelectAll" name="isSelectAll">
         <button type="submit" class="btn btn-outline-primary ml-1" name="add">Add</button>
+        <button type="submit" class="btn btn-outline-primary ml-1" name="move">Move</button>
         <button type="submit" class="btn btn-outline-danger ml-1" name="remove">Remove</button>
       </div>
       <table class="table table-hover">
@@ -47,6 +48,7 @@
             <th>Classification</th>
             <th>Observations</th>
             <th>Saved Data</th>
+            <th>Groups</th>
             <th>Lightcurve</th>
           </tr>
         </thead>
@@ -60,6 +62,7 @@
             <td>{{ target|target_extra_field:"classification" }}</td>
             <td>{{ target.observationrecord_set.count }}</td>
             <td>{{ target.dataproduct_set.count }}</td>
+            <td>{{ target.targetlist_set.all|join:", "}}</td>
             <td>{% sparkline target 25 %}</td>
           </tr>
           {% empty %}
@@ -82,7 +85,12 @@
   {{ filter.fields }}
   <div class="col-md-2">
     <form action="" method="get" class="form">
-      {% bootstrap_form filter.form %}
+      {% bootstrap_field filter.form.targetlist__name %}
+      {% bootstrap_field filter.form.classification %}
+      {% bootstrap_field filter.form.name %}
+      {% bootstrap_field filter.form.cone_search %}
+      {% bootstrap_field filter.form.key %}
+      {% bootstrap_field filter.form.value %}
       {% buttons %}
         <button type="submit" class="btn btn-primary">
           Filter
