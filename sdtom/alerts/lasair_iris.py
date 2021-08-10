@@ -1,6 +1,9 @@
+from pytz import UTC
 from tom_alerts.alerts import GenericQueryForm, GenericAlert, GenericBroker
 from tom_targets.models import Target
 from django import forms
+from django.utils import timezone
+from datetime import timedelta, datetime
 from django.conf import settings
 from typing import Iterator
 import requests
@@ -47,9 +50,12 @@ class LasairIrisBroker(GenericBroker):
         Fetches a list of results from a Lasair stored query
         """
         query_name = parameters['queryname']
+        since = parameters.get('since', timezone.now() - timedelta(days=1))
         response = requests.get(f'{LASAIR_IRIS_URL}/lasair/static/streams/{query_name}')
         response.raise_for_status()
-        return iter(response.json()['digest'])
+        return iter(
+            alert for alert in response.json()['digest'] if datetime.strptime(alert['UTC'], '%Y-%m-%d %H:%M:%S') > since
+        )
 
     def _query(self, selected: str, conditions: str, tables: str = 'objects') -> requests.Response:
         data = {

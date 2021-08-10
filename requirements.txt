@@ -1,4 +1,4 @@
-git+https://github.com/Star-Destroyers/tom_base.git@feature/move_targets
+git+https://github.com/Star-Destroyers/tom_base.git
 gunicorn
 django-heroku
 ipython

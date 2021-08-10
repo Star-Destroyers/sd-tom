@@ -286,7 +286,8 @@ HARVESTERS = {
 #     {'name': 'dicovery_date', 'type': 'datetime'}
 # ]
 EXTRA_FIELDS = [
-    {'name': 'classification', 'type': 'string'}
+    {'name': 'classification', 'type': 'string'},
+    {'name': 'query_name', 'type': 'string'}
 ]
 
 # Authentication strategy can either be LOCKED (required login for all views)
