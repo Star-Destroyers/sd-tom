@@ -25,9 +25,9 @@ def pil2datauri(img):
 def sparkline(target, height, spacing=5, color_map=None):
     if not color_map:
         color_map = {
-            'i': (255, 0, 0),
+            'r': (255, 0, 0),
             'g': (0, 255, 0),
-            'r': (0, 0, 255)
+            'i': (0, 0, 0)
         }
 
     vals = target.reduceddatum_set.filter(
