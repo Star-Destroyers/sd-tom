@@ -65,3 +65,13 @@ def sparkline(target, height, spacing=5, color_map=None):
 
     data_uri = pil2datauri(image)
     return {'sparkline': data_uri}
+
+
+@register.filter
+def badge(list_name):
+    names = {
+        'New': 'badge-warning',
+        'Uninteresting': 'badge-secondary',
+        'Interesting': 'badge-primary'
+    }
+    return names.get(list_name, 'badge-dark')

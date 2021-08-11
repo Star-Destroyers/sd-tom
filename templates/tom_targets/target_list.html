@@ -62,7 +62,7 @@
             <td>{{ target|target_extra_field:"classification" }}</td>
             <td>{{ target.observationrecord_set.count }}</td>
             <td>{{ target.dataproduct_set.count }}</td>
-            <td>{{ target.targetlist_set.all|join:", "}}</td>
+            <td>{% for tl in target.targetlist_set.all %}<span class="badge {{ tl.name|badge }} mr-1">{{ tl.name }}</span>{% endfor %}
             <td>{% sparkline target 25 %}</td>
           </tr>
           {% empty %}
