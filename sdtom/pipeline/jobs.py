@@ -34,7 +34,7 @@ def fetch_new_lasair_alerts():
     queries = BrokerQuery.objects.filter(broker=LasairIrisBroker.name)
     lasair_broker = LasairIrisBroker()
     for query in queries:
-        last_run = query.last_run or timezone.now() - timedelta(days=2)
+        last_run = query.last_run or timezone.now() - timedelta(days=1)
         alerts = lasair_broker.fetch_alerts({'since': last_run, **query.parameters})
         while True:
             try:
