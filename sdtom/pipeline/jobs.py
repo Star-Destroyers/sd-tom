@@ -1,7 +1,7 @@
 from tom_targets.models import Target, TargetExtra, TargetList
 from tom_alerts.brokers.mars import MARSBroker
 from tom_alerts.models import BrokerQuery
-from datetime import timedelta, datetime
+from datetime import timedelta
 from django.utils import timezone
 import logging
 
@@ -34,7 +34,7 @@ def fetch_new_lasair_alerts():
     queries = BrokerQuery.objects.filter(broker=LasairIrisBroker.name)
     lasair_broker = LasairIrisBroker()
     for query in queries:
-        last_run = query.last_run or datetime.utcnow() - timedelta(days=1)
+        last_run = query.last_run or timezone.now() - timedelta(days=2)
         alerts = lasair_broker.fetch_alerts({'since': last_run, **query.parameters})
         while True:
             try:
