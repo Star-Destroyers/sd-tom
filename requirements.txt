@@ -2,3 +2,5 @@ git+https://github.com/Star-Destroyers/tom_base.git
 gunicorn
 django-heroku
 ipython
+redis
+django-redis
