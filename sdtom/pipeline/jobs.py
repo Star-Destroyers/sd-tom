@@ -50,7 +50,7 @@ def fetch_new_lasair_alerts():
                     logger.info('Created target ' + str(target))
                 update_datums_from_mars(target)
                 add_queryname_to_extras(target, query.parameters['query_name'])
-                query.last_run = timezone.now()
             except StopIteration:
                 break
-                logger.info('Finished importing new lasair targets')
+        logger.info('Finished importing new lasair targets')
+        query.last_run = timezone.now()
