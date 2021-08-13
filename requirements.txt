@@ -1,4 +1,4 @@
-git+https://github.com/Star-Destroyers/tom_base.git@feature/improved_photometry
+git+https://github.com/Star-Destroyers/tom_base.git
 gunicorn
 django-heroku
 ipython
