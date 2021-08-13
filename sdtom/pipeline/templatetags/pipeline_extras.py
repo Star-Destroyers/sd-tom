@@ -37,6 +37,7 @@ def sparkline(target, height, spacing=5, color_map=None):
     if len(vals) < 1:
         return {'sparkline': None}
 
+    vals = [v for v in vals if v['value'].get('magnitude')]
     min_mag = min([val['value']['magnitude'] for val in vals])
     max_mag = max([val['value']['magnitude'] for val in vals])
 
