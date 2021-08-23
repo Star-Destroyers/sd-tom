@@ -10,7 +10,12 @@ register = template.Library()
 
 
 def draw_point(draw, x, y, color):
-    draw.ellipse([(x, y), (x + 5, y + 5)], fill=color, outline=color)
+    draw.ellipse((x, y, x + 6, y + 6), fill=color, outline=color)
+
+
+def draw_nodetection(draw, x, y, color):
+    color = (*color, 200)
+    draw.polygon([(x - 2, y), (x + 2, y), (x, y + 2)], fill=color)
 
 
 def pil2datauri(img):
@@ -25,8 +30,8 @@ def pil2datauri(img):
 def sparkline(target, height, spacing=5, color_map=None):
     if not color_map:
         color_map = {
-            'r': (255, 0, 0),
-            'g': (0, 255, 0),
+            'r': (200, 0, 0),
+            'g': (0, 200, 0),
             'i': (0, 0, 0)
         }
 
@@ -37,18 +42,22 @@ def sparkline(target, height, spacing=5, color_map=None):
     if len(vals) < 1:
         return {'sparkline': None}
 
-    vals = [v for v in vals if v['value'].get('magnitude')]
-    min_mag = min([val['value']['magnitude'] for val in vals])
-    max_mag = max([val['value']['magnitude'] for val in vals])
-
+    vals = [v for v in vals if v['value']]
+    min_mag = min([val['value']['magnitude'] for val in vals if val['value'].get('magnitude')])
+    max_mag = max([val['value']['magnitude'] for val in vals if val['value'].get('magnitude')])
+    # The following values are used if we want the graph's y range to extend to the values of non-detections
+    # min_limit = min([val['value']['limit'] for val in vals if val['value'].get('limit')])
+    # max_limit = max([val['value']['limit'] for val in vals if val['value'].get('limit')])
     distinct_filters = set([val['value']['filter'] for val in vals])
-    by_filter = {f: [None] * 32 for f in distinct_filters}
+    by_filter = {f: [(None, None)] * 32 for f in distinct_filters}
 
     for val in vals:
         day_index = (val['timestamp'].replace(tzinfo=pytz.UTC) - timezone.now()).days
-        by_filter[val['value']['filter']][day_index] = val['value']['magnitude']
+        by_filter[val['value']['filter']][day_index] = (val['value'].get('magnitude'), val['value'].get('limit'))
 
-    val_range = max_mag - min_mag
+    graph_min = min_mag  # min(min_mag, min_limit)
+    graph_max = max_mag  # max(max_mag, max_limit)
+    val_range = graph_max - graph_min
     pixels_per_unit = height / val_range
     image_width = (spacing + 1) * (32 - 1)
     image_height = height + 10
@@ -58,10 +67,13 @@ def sparkline(target, height, spacing=5, color_map=None):
     for d_filter, day_mags in by_filter.items():
         x = 0
         color = color_map.get(d_filter, 'r')
-        for mag in day_mags:
+        for (mag, limit) in day_mags:
             if mag:
-                y = ((mag - min_mag) * pixels_per_unit)
+                y = ((mag - graph_min) * pixels_per_unit)
                 draw_point(d, x, y, color)
+            if limit:
+                y = ((limit - graph_min) * pixels_per_unit)
+                draw_nodetection(d, x, y, color)
             x += spacing
 
     data_uri = pil2datauri(image)
