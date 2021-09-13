@@ -1,4 +1,4 @@
-git+https://github.com/Star-Destroyers/tom_base.git
+git+https://github.com/Star-Destroyers/tom_base.git@fix/tns_api_update
 gunicorn
 django-heroku
 ipython

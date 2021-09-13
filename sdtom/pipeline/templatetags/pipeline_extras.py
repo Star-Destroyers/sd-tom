@@ -58,11 +58,16 @@ def sparkline(target, height, spacing=5, color_map=None):
     graph_min = min_mag  # min(min_mag, min_limit)
     graph_max = max_mag  # max(max_mag, max_limit)
     val_range = graph_max - graph_min
-    pixels_per_unit = height / val_range
     image_width = (spacing + 1) * (32 - 1)
     image_height = height + 10
 
     image = Image.new("RGBA", (image_width, image_height), (255, 255, 255, 0))
+    try:
+        pixels_per_unit = height / val_range
+    except ZeroDivisionError:
+        # return blank image
+        data_uri = pil2datauri(image)
+        return {'sparkline': data_uri}
     d = ImageDraw.Draw(image)
     for d_filter, day_mags in by_filter.items():
         x = 0

@@ -259,7 +259,9 @@ TOM_ALERT_CLASSES = [
 
 BROKERS = {
     'TNS': {
-        'api_key': ''
+        'api_key': os.getenv('TNS_API_KEY'),
+        'bot_id': os.getenv('TNS_BOT_ID'),
+        'bot_name': os.getenv('TNS_BOT_NAME')
     },
     'LASAIRIRIS': {
         'api_key': os.getenv('LASAIR_API_KEY')
