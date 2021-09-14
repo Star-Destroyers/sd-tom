@@ -28,9 +28,8 @@ def update_datums_from_mars(target: Target):
 def add_item_to_extras(target, key, value):
     try:
         te = target.targetextra_set.get(key=key)
-        if value not in te.value:
-            te.value = te.value + ' ' + value
-            te.save()
+        te.value = value
+        te.save()
     except TargetExtra.DoesNotExist:
         TargetExtra.objects.create(target=target, key='query_name', value=value)
 
@@ -58,9 +57,9 @@ def get_tns_classification(name: str) -> Optional[str]:
             })
         }
         response = requests.post(TNS_OBJECT_URL, data, headers=tns_broker.tns_headers())
-
+        print(json.dumps(response.json(), indent=2))
         try:
-            return response.json()['data']['reply']['name_prefix']
+            return response.json()['data']['reply']['object_name']['name']
         except KeyError:
             continue
 

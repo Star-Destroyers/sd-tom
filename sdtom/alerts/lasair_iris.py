@@ -80,6 +80,7 @@ class LasairIrisBroker(GenericBroker):
 
     def to_generic_alert(self, alert: dict) -> LasairIrisGenericAlert:
         score = 1 if alert['score'] == 'Within 2arcsec of PS1 star' else 0
+        classification = '{} - Lasair'.format(alert['classification']) if alert.get('classification') else ''
         return LasairIrisGenericAlert(
             url=LASAIR_IRIS_URL + '/object/' + alert['objectId'],
             id=alert['objectId'],
@@ -89,7 +90,7 @@ class LasairIrisBroker(GenericBroker):
             timestamp=alert['UTC'],
             mag=alert['rmag'],
             score=score,
-            classification=alert['classification']
+            classification=classification
         )
 
     def to_target(self, alert):
