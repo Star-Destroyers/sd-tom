@@ -57,19 +57,26 @@ def get_tns_classification(name: str) -> Optional[str]:
             })
         }
         response = requests.post(TNS_OBJECT_URL, data, headers=tns_broker.tns_headers())
-        print(json.dumps(response.json(), indent=2))
         try:
-            return response.json()['data']['reply']['object_name']['name']
+            return response.json()['data']['reply']['object_type']['name']
         except KeyError:
             continue
 
     return None
 
 
+def find_new_tns_classifications():
+    logger.info('Updating TNS classifications')
+    targets = Target.objects.all().order_by('-created')[:10]
+    for target in targets:
+        classification = get_tns_classification(target.name)
+        if classification:
+            add_item_to_extras(target, 'classification', classification)
+
+
 def fetch_new_lasair_alerts():
     queries = BrokerQuery.objects.filter(broker=LasairIrisBroker.name)
     lasair_broker = LasairIrisBroker()
-    tns_broker = TNSBroker()
     for query in queries:
         last_run = query.last_run or timezone.now() - timedelta(days=1)
         alerts = lasair_broker.fetch_alerts({'since': last_run, **query.parameters})
