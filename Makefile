@@ -7,6 +7,9 @@ shell:
 import:
 	python3 manage.py run_pipeline_import
 
+scan:
+	python3 manage.py run_tns_scan
+
 pulldb:
 	-docker start tde-postgres
 	-docker exec -e PGPASSWORD='postgres' -it tde-postgres dropdb tdeexchange -Upostgres
