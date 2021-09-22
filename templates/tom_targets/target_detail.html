@@ -92,7 +92,7 @@ $(document).ready(function(){
         {% target_groups target %}
       </div>
       <div class="tab-pane" id="photometry">
-        {% photometry_for_target target %}
+        {% photometry_for_target target width=700 height=400 background='rgba(0,0,0,0)' grid=False label_color='#dcdcdc' %}
         </div>
       <div class="tab-pane" id="spectroscopy">
         {% spectroscopy_for_target target %}
