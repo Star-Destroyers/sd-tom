@@ -46,7 +46,7 @@
             <th><input type="checkbox" id="selectPage" onClick="select_page(this, {{ target_count }})" /></th>
             <th>Name</th>
             <th>Classification</th>
-            <th>Observations</th>
+            <th>Source</th>
             <th>Latest Mag</th>
             <th>Groups</th>
             <th>Lightcurve</th>
@@ -60,7 +60,7 @@
                 <a href="{% url 'targets:detail' target.id %}" title="{{ target.name }}">{{ target.names|join:", " }}</a>
             </td>
             <td>{{ target|target_extra_field:"classification" }}</td>
-            <td>{{ target.observationrecord_set.count }}</td>
+            <td>{{ target|target_extra_field:"query_name" }}</td>
             <td>{{ target|latest_mag|floatformat:2 }}</td>
             <td>{% for tl in target.targetlist_set.all %}<span class="badge {{ tl.name|badge }} mr-1">{{ tl.name }}</span>{% endfor %}
             <td>{% sparkline target 25 %}</td>
