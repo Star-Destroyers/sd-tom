@@ -6,6 +6,7 @@ from tom_alerts.models import BrokerQuery
 from datetime import timedelta
 from django.utils import timezone
 from django.conf import settings
+from django.core.cache import cache
 import requests
 import logging
 import json
@@ -23,6 +24,10 @@ def update_datums_from_mars(target: Target):
     alert = next(alerts)
 
     mars.process_reduced_data(target, alert)
+    try:
+        cache.set(f'latest_mag_{target.id}', target.reduceddatum_set.first().value.get('magnitude'))
+    except Exception:
+        logger.warn('Could not cache latest magnitude.')
 
 
 def add_item_to_extras(target, key, value):

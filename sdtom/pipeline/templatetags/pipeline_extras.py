@@ -4,9 +4,14 @@ import base64
 from django import template
 from datetime import datetime, timedelta
 from django.utils import timezone
+from django.core.cache import cache
 import pytz
+import logging
+
+from tom_targets.models import Target
 
 register = template.Library()
+logger = logging.getLogger('__name__')
 
 
 def draw_point(draw, x, y, color):
@@ -93,3 +98,18 @@ def badge(list_name):
         'Interesting': 'badge-primary'
     }
     return names.get(list_name, 'badge-dark')
+
+
+@register.filter
+def latest_mag(target: Target):
+    mag_cache_key = f'latest_mag_{target.id}'
+    latest_mag = cache.get(mag_cache_key)
+    if not latest_mag:
+        try:
+            latest_mag = target.reduceddatum_set.first().value.get('magnitude')
+        except Exception:
+            latest_mag = None
+            logger.warn('Could not cache latest mag.')
+        cache.set(mag_cache_key, latest_mag, timeout=None)  # Cache forever until invalidated
+
+    return latest_mag
