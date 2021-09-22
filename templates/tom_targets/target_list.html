@@ -57,7 +57,7 @@
           <tr>
             <td><input type="checkbox" name="selected-target" value="{{ target.id }}" onClick="single_select()"/></td>
             <td>
-                <a href="{% url 'targets:detail' target.id %}" title="{{ target.name }}">{{ target.names|join:", " }}</a>
+                <a href="{% url 'target-slug-detail' target.name %}" title="{{ target.name }}">{{ target.names|join:", " }}</a>
             </td>
             <td>{{ target|target_extra_field:"classification" }}</td>
             <td>{{ target|target_extra_field:"query_name" }}</td>
