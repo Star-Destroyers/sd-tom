@@ -72,7 +72,11 @@ def get_tns_classification(name: str) -> Optional[str]:
 
 def find_new_tns_classifications():
     logger.info('Updating TNS classifications')
-    targets = Target.objects.all().order_by('-created')[:10]
+    targets = Target.objects.all().filter(
+        created__gt=(timezone.now() - timedelta(days=30))
+    ).exclude(
+      targetlist__name='Uninteresting'
+    ).order_by('-created')[:10]
     for target in targets:
         classification = get_tns_classification(target.name)
         if classification:
