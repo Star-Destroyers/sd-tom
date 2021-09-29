@@ -113,3 +113,8 @@ def latest_mag(target: Target):
         cache.set(mag_cache_key, latest_mag, timeout=None)  # Cache forever until invalidated
 
     return latest_mag
+
+
+@register.inclusion_tag('pipeline/partials/brokerlinks.html')
+def broker_links(target):
+    return {'target': target}
