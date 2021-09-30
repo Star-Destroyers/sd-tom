@@ -85,6 +85,7 @@
   {{ filter.fields }}
   <div class="col-md-2">
     <form action="" method="get" class="form">
+      {% bootstrap_field filter.form.order %}
       {% bootstrap_field filter.form.targetlist__name %}
       {% bootstrap_field filter.form.classification %}
       {% bootstrap_field filter.form.name %}
