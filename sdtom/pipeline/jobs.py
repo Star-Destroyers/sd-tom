@@ -1,19 +1,23 @@
-from typing import Optional
-from tom_targets.models import Target, TargetExtra, TargetList
+from tom_targets.models import Target, TargetList
 from tom_alerts.brokers.mars import MARSBroker
-from tom_alerts.brokers.tns import TNSBroker, TNS_SEARCH_URL, TNS_OBJECT_URL
+
 from tom_alerts.models import BrokerQuery
 from datetime import timedelta
 from django.utils import timezone
-from django.conf import settings
 from django.core.cache import cache
-import requests
+
+from sdtom.pipeline.tns import update_tns_data
+
 import logging
-import json
 
 from sdtom.alerts.lasair_iris import LasairIrisBroker
+from sdtom.pipeline.utils import add_item_to_extras
 
 logger = logging.getLogger(__name__)
+
+
+def find_new_tns_classifications():
+    update_tns_data()
 
 
 def update_datums_from_mars(target: Target):
@@ -28,59 +32,6 @@ def update_datums_from_mars(target: Target):
         cache.set(f'latest_mag_{target.id}', target.reduceddatum_set.first().value.get('magnitude'))
     except Exception:
         logger.warn('Could not cache latest magnitude.')
-
-
-def add_item_to_extras(target, key, value):
-    try:
-        te = target.targetextra_set.get(key=key)
-        te.value = value
-        te.save()
-    except TargetExtra.DoesNotExist:
-        TargetExtra.objects.create(target=target, key='query_name', value=value)
-
-
-def get_tns_classification(name: str) -> Optional[str]:
-    tns_broker = TNSBroker()
-    data = {
-        'api_key': settings.BROKERS['TNS']['api_key'],
-        'data': json.dumps({
-            'internal_name': name,
-        })
-    }
-    response = requests.post(TNS_SEARCH_URL, data, headers=tns_broker.tns_headers())
-    transients = response.json()
-
-    for transient in transients['data']['reply']:
-        # We will go through results until we find one with a classification otherwise
-        # return None
-        data = {
-            'api_key': settings.BROKERS['TNS']['api_key'],
-            'data': json.dumps({
-                'objname': transient['objname'],
-                'photometry': 1,
-                'spectroscopy': 0,
-            })
-        }
-        response = requests.post(TNS_OBJECT_URL, data, headers=tns_broker.tns_headers())
-        try:
-            return response.json()['data']['reply']['object_type']['name']
-        except KeyError:
-            continue
-
-    return None
-
-
-def find_new_tns_classifications():
-    logger.info('Updating TNS classifications')
-    targets = Target.objects.all().filter(
-        created__gt=(timezone.now() - timedelta(days=30))
-    ).exclude(
-      targetlist__name='Uninteresting'
-    ).order_by('-created')[:10]
-    for target in targets:
-        classification = get_tns_classification(target.name)
-        if classification:
-            add_item_to_extras(target, 'classification', classification)
 
 
 def fetch_new_lasair_alerts():
@@ -103,12 +54,6 @@ def fetch_new_lasair_alerts():
                     logger.info('Created target ' + str(target))
                 update_datums_from_mars(target)
                 add_item_to_extras(target, 'query_name', query.parameters['query_name'])
-                try:
-                    classification = get_tns_classification(generic_alert.name)
-                    if classification:
-                        add_item_to_extras(target, key='classification', value=classification)
-                except Exception as e:
-                    logger.warn('Got exception fetching classification from TNS %s', e)
             except StopIteration:
                 break
         logger.info('Finished importing new lasair targets')
