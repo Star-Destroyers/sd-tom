@@ -56,6 +56,7 @@ def download_tns_csv(d: date = date.today()) -> str:
     data = {'api_key': settings.BROKERS['TNS']['api_key']}
     headers = tns_broker.tns_headers()
     response = requests.post(url, data, headers=headers)
+    response.raise_for_status()
     with ZipFile(io.BytesIO(response.content)) as zipfile:
         with zipfile.open(csv_name) as csv_file:
             csv_str = csv_file.read().decode('utf-8')
