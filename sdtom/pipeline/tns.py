@@ -66,7 +66,7 @@ def download_tns_csv(d: date = date.today()) -> str:
 
 def process_csv(csv_str: str) -> List[dict]:
     reader = csv.DictReader(io.StringIO(csv_str))
-    return [r for r in reader if r['type']]
+    return [r for r in reader]
 
 
 def update_tns_data():
@@ -75,18 +75,15 @@ def update_tns_data():
 
     for tns_target in named_targets:
         matching_targets = Target.objects.all().filter(
-            created__gt=(timezone.now() - timedelta(days=30))
+            created__gt=(timezone.now() - timedelta(days=30)),
+            name__in=tns_target['internal_names'].replace(' ', '').split(',')
         ).exclude(
             targetlist__name='Uninteresting'
         )
-        matching_targets = cone_search_filter(matching_targets, tns_target['ra'], tns_target['declination'], 0.0006)
-        if matching_targets.count() > 1:
-            logger.error('Matched multiple targets in TNS cone search, skipping ' + str(matching_targets))
-            continue
-        elif matching_targets.count() == 1:
-            target = matching_targets.first()
+        for target in matching_targets:
             logger.info('Adding TNS classification and names to ' + str(target))
-            add_item_to_extras(target, 'classification', tns_target['type'])
+            if(tns_target.get('type')):
+                add_item_to_extras(target, 'classification', tns_target['type'])
             try:
                 TargetName.objects.create(target=target, name=tns_target['name'])
             except Exception:
