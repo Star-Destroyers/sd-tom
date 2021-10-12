@@ -29,7 +29,7 @@ def update_datums_from_mars(target: Target):
 
     mars.process_reduced_data(target, alert)
     try:
-        cache.set(f'latest_mag_{target.id}', target.reduceddatum_set.first().value.get('magnitude'))
+        cache.set(f'latest_mag_{target.id}', target.reduceddatum_set.first().value.get('magnitude'), timeout=None)
     except Exception:
         logger.warn('Could not cache latest magnitude.')
 
