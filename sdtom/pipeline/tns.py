@@ -1,6 +1,5 @@
 from tom_alerts.brokers.tns import TNSBroker, TNS_SEARCH_URL, TNS_OBJECT_URL
-from tom_targets.utils import cone_search_filter
-from tom_targets.models import Target, TargetName
+from tom_targets.models import Target
 from django.conf import settings
 from django.utils import timezone
 from typing import Optional, List
@@ -12,7 +11,6 @@ import logging
 import io
 import csv
 
-from sdtom.pipeline.utils import add_item_to_extras
 
 logger = logging.getLogger(__name__)
 
