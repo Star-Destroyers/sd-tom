@@ -75,16 +75,15 @@ def update_tns_data():
 
     for tns_target in named_targets:
         matching_targets = Target.objects.all().filter(
-            created__gt=(timezone.now() - timedelta(days=30)),
             name__in=tns_target['internal_names'].replace(' ', '').split(',')
         ).exclude(
             targetlist__name='Uninteresting'
         )
         for target in matching_targets:
             logger.info('Adding TNS classification and names to ' + str(target))
-            if(tns_target.get('type')):
-                add_item_to_extras(target, 'classification', tns_target['type'])
-            try:
-                TargetName.objects.create(target=target, name=tns_target['name'])
-            except Exception:
-                pass
+            extras = {}
+            names = [tns_target['name']]
+            if tns_target.get('type'):
+                extras['classification'] = tns_target['type']
+            target.modified = timezone.now()
+            target.save(extras=extras, names=names)

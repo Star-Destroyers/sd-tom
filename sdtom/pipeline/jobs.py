@@ -11,7 +11,6 @@ from sdtom.pipeline.tns import update_tns_data
 import logging
 
 from sdtom.alerts.lasair_iris import LasairIrisBroker
-from sdtom.pipeline.utils import add_item_to_extras
 
 logger = logging.getLogger(__name__)
 
@@ -52,8 +51,8 @@ def fetch_new_lasair_alerts():
                     target_list, _ = TargetList.objects.get_or_create(name='New')
                     target_list.targets.add(target)
                     logger.info('Created target ' + str(target))
+                target.save(extras={'query_name': query.parameters['query_name']})
                 update_datums_from_mars(target)
-                add_item_to_extras(target, 'query_name', query.parameters['query_name'])
             except StopIteration:
                 break
         logger.info('Finished importing new lasair targets')
