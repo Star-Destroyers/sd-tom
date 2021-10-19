@@ -71,8 +71,8 @@ $(document).ready(function(){
         <hr/>
         <h4>Plan</h4>
         {% if object.type == 'SIDEREAL' %}
-          {% target_plan fast_render=True %}
-          {% moon_distance object %}
+          {% target_plan fast_render=True background='rgba(0,0,0,0)' grid=False label_color='#dcdcdc' %}
+          {% moon_distance object background='rgba(0,0,0,0)' grid=False label_color='#dcdcdc' %}
         {% elif target.type == 'NON_SIDEREAL' %}
           <p>Airmass plotting for non-sidereal targets is not currently supported. If you would like to add this functionality, please check out the <a href="https://github.com/TOMToolkit/tom_nonsidereal_airmass" target="_blank">non-sidereal airmass plugin.</a></p>
         {% endif %}
