@@ -118,3 +118,8 @@ def latest_mag(target: Target):
 @register.inclusion_tag('pipeline/partials/brokerlinks.html')
 def broker_links(target):
     return {'target': target}
+
+
+@register.inclusion_tag('pipeline/partials/classifications.html')
+def classifications(target):
+    return {'target': target}

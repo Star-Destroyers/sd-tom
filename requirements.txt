@@ -1,4 +1,5 @@
 git+https://github.com/Star-Destroyers/tom_base.git@dev
+git+https://github.com/Star-Destroyers/sd-alert-pipe.git
 gunicorn
 django-heroku
 ipython
