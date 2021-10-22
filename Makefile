@@ -10,6 +10,9 @@ import:
 scan:
 	python3 manage.py run_tns_scan
 
+purge:
+	python3 manage.py purge_targets
+
 pulldb:
 	-docker start tde-postgres
 	-docker exec -e PGPASSWORD='postgres' -it tde-postgres dropdb tdeexchange -Upostgres
