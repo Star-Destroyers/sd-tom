@@ -110,7 +110,7 @@ def latest_mag(target: Target):
         except Exception:
             latest_mag = None
             logger.warn('Could not cache latest mag.')
-        cache.set(mag_cache_key, latest_mag, timeout=None)  # Cache forever until invalidated
+        cache.set(mag_cache_key, latest_mag, timeout=60 * 60 * 24 * 30)  # Cache for 30 days
 
     return latest_mag
 
