@@ -11,7 +11,7 @@ class Command(BaseCommand):
         try:
             self.stdout.write('Removing targets...')
             Target.objects.filter(
-                targetlist__name='Uninteresting', created__lt=timezone.now() - timedelta(days=30)
+                targetlist__name__in=['Uninteresting', 'New'], created__lt=timezone.now() - timedelta(days=30)
             ).delete()
             self.stdout.write('Done.')
         except KeyboardInterrupt:
