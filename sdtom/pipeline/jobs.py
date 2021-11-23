@@ -24,7 +24,11 @@ def update_datums_from_mars(target: Target):
     alerts = mars.fetch_alerts({'objectId': target.name})
 
     # always get the latest alert
-    alert = next(alerts)
+    try:
+        alert = next(alerts)
+    except StopIteration:
+        logger.info('No alerts for this target')
+        return
 
     mars.process_reduced_data(target, alert)
     try:
@@ -57,3 +61,4 @@ def fetch_new_lasair_alerts():
                 break
         logger.info('Finished importing new lasair targets')
         query.last_run = timezone.now()
+        query.save()
