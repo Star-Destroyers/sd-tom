@@ -48,6 +48,7 @@
             <th>Classification</th>
             <th>Source</th>
             <th>Latest Mag</th>
+            <th>RA/Dec</th>
             <th>Groups</th>
             <th>Lightcurve</th>
           </tr>
@@ -62,6 +63,7 @@
             <td>{{ target|target_extra_field:"classification" }}</td>
             <td>{{ target|target_extra_field:"query_name" }}</td>
             <td>{{ target|latest_mag|floatformat:2 }}</td>
+            <td>{{ target.ra|floatformat }}<br/> {{ target.dec|floatformat }}</td>
             <td>{% for tl in target.targetlist_set.all %}<span class="badge {{ tl.name|badge }} mr-1">{{ tl.name }}</span>{% endfor %}
             <td>{% sparkline target 25 %}</td>
           </tr>
