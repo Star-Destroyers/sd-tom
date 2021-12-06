@@ -34,6 +34,6 @@ class ClassificationView(View):
     async def get(self, request, *args, **kwargs):
         alerce = AlerceService()
         result = await alerce.get_probabilities(request.GET.get('name'))
-        top_10 = json.dumps({'antares': [r.dict() for r in result[:10]]})
+        top_10 = json.dumps({'alerce': [r.dict() for r in result if r.classifier_name == 'lc_classifier']})
         return HttpResponse(top_10, content_type='application/json')
 
