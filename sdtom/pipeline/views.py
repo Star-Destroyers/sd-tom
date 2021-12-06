@@ -4,10 +4,10 @@ from django.utils.decorators import classonlymethod
 from django.views.generic import View
 from tom_targets.models import Target
 from tom_targets.views import TargetDetailView
-from sd_alert_pipe.common import gather_data
 from sd_alert_pipe.alerce import AlerceService
 import asyncio
-import json
+import plotly.graph_objects as go
+from plotly import offline
 
 from sdtom.pipeline.jobs import update_datums_from_mars
 
@@ -34,6 +34,43 @@ class ClassificationView(View):
     async def get(self, request, *args, **kwargs):
         alerce = AlerceService()
         result = await alerce.get_probabilities(request.GET.get('name'))
-        top_10 = json.dumps({'alerce': [r.dict() for r in result if r.classifier_name == 'lc_classifier']})
-        return HttpResponse(top_10, content_type='application/json')
+        probs = [res for res in result if res.classifier_name == 'lc_classifier']
+        if len(probs) < 1:
+            return HttpResponse('none')
 
+        layout = go.Layout(
+            paper_bgcolor='rgba(0,0,0,0)',
+            plot_bgcolor='rgba(0,0,0,0)',
+            width=250,
+            height=250,
+            margin={'l': 50, 'r': 50, 'b': 50, 't': 50},
+            autosize=True,
+        )
+        data = go.Scatterpolar(
+            r=[res.probability for res in probs],
+            theta=[res.class_name for res in probs],
+            fill='toself'
+        )
+
+        fig = go.Figure(data=data, layout=layout)
+
+        fig.update_layout(
+            polar=dict(
+                radialaxis=dict(
+                    visible=False,
+                    ticks="",
+                    color='#dcdcdc',
+                    linecolor='#dcdcdc',
+                    showgrid=False,
+                    gridcolor='#dcdcdc'
+                )
+            ),
+            showlegend=False
+        )
+        fig.update_polars(bgcolor='rgba(0,0,0,0)', angularaxis_color='#dcdcdc')
+
+        graph = offline.plot(
+            fig, output_type='div', show_link=False
+        )
+
+        return HttpResponse(graph)

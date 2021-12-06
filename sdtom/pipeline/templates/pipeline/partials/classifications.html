@@ -1,22 +1,15 @@
 <p>Classifications</p>
-<table class="table table-sm" id="prob-table">
-    <thead>
-        <tr>
-            <th>Type</th><th>Probability</th>
-        </tr>
-    </thead>
-    <tbody>
-    </tbody>
-</table>
+<div id="probability-plot">
+    Loading...
+</div>
 <script type="text/javascript">
     $(document).ready(function(){
-        const result = $.getJSON('/targets/classification/?name={{ target.name }}', function(result){
-            result.alerce.forEach(function(prob){
-                $('#prob-table > tbody:last-child').append(
-                    '<tr><td>' + prob.class_name + '</td><td>' + prob.probability.toFixed(2) + '</td></tr>'
-                );
-            })
-            console.log(result)
+        const result = $.get('/targets/classification/?name={{ target.name }}', function(result){
+            if(result === 'none'){
+                $('#probability-plot').html('No classification avaialble yet.')
+            }else{
+                $('#probability-plot').html(result)
+            }
         })
     })
 </script>
