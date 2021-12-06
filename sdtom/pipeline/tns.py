@@ -1,11 +1,12 @@
 from tom_alerts.brokers.tns import TNSBroker, TNS_SEARCH_URL, TNS_OBJECT_URL
-from tom_targets.models import Target
+from tom_targets.models import Target, TargetList
 from django.conf import settings
 from django.utils import timezone
 from typing import Optional, List
 import requests
 from datetime import date, timedelta
 from zipfile import ZipFile
+from tom_targets.groups import move_selected_to_grouping
 import json
 import logging
 import io
@@ -67,6 +68,12 @@ def process_csv(csv_str: str) -> List[dict]:
     return [r for r in reader]
 
 
+def move_to_uninteresting(target):
+    uninteresting, _ = TargetList.objects.get_or_create(name='Uninteresting')
+    target.targetlist_set.clear()
+    uninteresting.targets.add(target)
+
+
 def update_tns_data():
     csv_str = download_tns_csv()
     named_targets = process_csv(csv_str)
@@ -83,5 +90,7 @@ def update_tns_data():
             names = [tns_target['name']]
             if tns_target.get('type'):
                 extras['classification'] = tns_target['type']
+                if 'SN' in tns_target['type'].upper():
+                    move_to_uninteresting(target)
             target.modified = timezone.now()
             target.save(extras=extras, names=names)
