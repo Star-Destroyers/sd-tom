@@ -37,6 +37,20 @@ def update_datums_from_mars(target: Target):
         logger.warn('Could not cache latest magnitude.')
 
 
+def append_queryname(target, query_name):
+    existing_query_name = target.extra_fields.get('query_name')
+
+    if existing_query_name:
+        if query_name in existing_query_name.split(','):
+            return existing_query_name
+        else:
+            new_query_name = f'{existing_query_name}, {query_name}'
+    else:
+        new_query_name = query_name
+
+    return new_query_name
+
+
 def fetch_new_lasair_alerts():
     queries = BrokerQuery.objects.filter(broker=LasairIrisBroker.name)
     lasair_broker = LasairIrisBroker()
@@ -55,7 +69,8 @@ def fetch_new_lasair_alerts():
                     target_list, _ = TargetList.objects.get_or_create(name='New')
                     target_list.targets.add(target)
                     logger.info('Created target ' + str(target))
-                target.save(extras={'query_name': query.parameters['query_name']})
+                query_name = append_queryname(target, query.parameters['query_name'])
+                target.save(extras={'query_name': query_name})
                 update_datums_from_mars(target)
             except StopIteration:
                 break
