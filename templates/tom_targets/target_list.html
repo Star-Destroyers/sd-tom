@@ -64,7 +64,7 @@
             <td>{{ target|latest_mag|floatformat:2 }}</td>
             <td>{{ target.ra|floatformat }}<br/> {{ target.dec|floatformat }}</td>
             <td>{% for tl in target.targetlist_set.all %}<span class="badge {{ tl.name|badge }} mr-1">{{ tl.name }}</span>{% endfor %}
-            <td>{% sparkline target 25 %}</td>
+            <td>{% reduceddatum_sparkline target 25 days=32 %}</td>
           </tr>
           {% empty %}
           <tr>
