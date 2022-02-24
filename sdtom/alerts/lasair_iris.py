@@ -52,7 +52,7 @@ class LasairIrisBroker(GenericBroker):
         """
         query_name = parameters['queryname']
         since = parameters.get('since', timezone.now() - timedelta(days=7))
-        response = requests.get(f'{LASAIR_IRIS_URL}/lasair/static/streams/{query_name}')
+        response = requests.get(f'{LASAIR_IRIS_URL}/lasair/static/streams/{query_name}/')
         response.raise_for_status()
         return iter(
             alert for alert in response.json()['digest']
