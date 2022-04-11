@@ -45,7 +45,7 @@ def append_queryname(target, query_name):
     existing_query_name = target.extra_fields.get("query_name")
 
     if existing_query_name:
-        if query_name in existing_query_name.split(","):
+        if query_name in [n.strip() for n in existing_query_name.split(",")]:
             return existing_query_name
         else:
             new_query_name = f"{existing_query_name}, {query_name}"
