@@ -4,4 +4,3 @@ gunicorn
 django-heroku
 ipython
 redis
-django-redis
