@@ -3,8 +3,8 @@
     <h4>Photometry</h4>
   </div>
   <div class="col-md-8">
-    <a href="{% url 'pipeline:mars-datums' %}?target_id={{ target.id }}" class="btn btn-primary mr-3" title="Fetch Photometry">
-      Fetch photometry from MARS
+    <a href="{% url 'pipeline:alerce-datums' %}?target_id={{ target.id }}" class="btn btn-primary mr-3" title="Fetch Photometry">
+      Fetch photometry from ALeRCE
     </a>
     <a href="{% url 'dataproducts:update-reduced-data' %}?target_id={{ target.id }}" class="btn btn-primary" title="Update Targets">
       Check for new data

@@ -1,5 +1,6 @@
 from tom_targets.models import Target, TargetList
 from tom_alerts.brokers.mars import MARSBroker
+from tom_alerts.brokers.alerce import ALeRCEBroker
 
 from tom_alerts.models import BrokerQuery
 from datetime import timedelta
@@ -31,6 +32,19 @@ def update_datums_from_mars(target: Target):
         return
 
     mars.process_reduced_data(target, alert)
+    try:
+        cache.set(
+            f"latest_mag_{target.id}",
+            target.reduceddatum_set.first().value.get("magnitude"),
+            timeout=60 * 60 * 24 * 30,
+        )
+    except Exception:
+        logger.warn("Could not cache latest magnitude.")
+
+
+def update_datums_from_alerce(target: Target):
+    alerce = ALeRCEBroker()
+    alerce.process_reduced_data(target)
     try:
         cache.set(
             f"latest_mag_{target.id}",
@@ -75,7 +89,7 @@ def fetch_new_lasair_alerts():
                     logger.info("Created target " + str(target))
                 query_name = append_queryname(target, query.parameters["query_name"])
                 target.save(extras={"query_name": query_name})
-                update_datums_from_mars(target)
+                update_datums_from_alerce(target)
             except StopIteration:
                 break
         logger.info("Finished importing new lasair targets")
