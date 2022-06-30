@@ -20,9 +20,11 @@ def get_tns_classification(name: str) -> Optional[str]:
     tns_broker = TNSBroker()
     data = {
         'api_key': settings.BROKERS['TNS']['api_key'],
-        'data': json.dumps({
-            'internal_name': name,
-        })
+        'data': json.dumps(
+            {
+                'internal_name': name,
+            }
+        ),
     }
     response = requests.post(TNS_SEARCH_URL, data, headers=tns_broker.tns_headers())
     transients = response.json()
@@ -32,11 +34,13 @@ def get_tns_classification(name: str) -> Optional[str]:
         # return None
         data = {
             'api_key': settings.BROKERS['TNS']['api_key'],
-            'data': json.dumps({
-                'objname': transient['objname'],
-                'photometry': 1,
-                'spectroscopy': 0,
-            })
+            'data': json.dumps(
+                {
+                    'objname': transient['objname'],
+                    'photometry': 1,
+                    'spectroscopy': 0,
+                }
+            ),
         }
         response = requests.post(TNS_OBJECT_URL, data, headers=tns_broker.tns_headers())
         try:
@@ -75,22 +79,26 @@ def move_to_uninteresting(target):
 
 
 def update_tns_data():
-    csv_str = download_tns_csv()
-    named_targets = process_csv(csv_str)
+    for day_back in range(3):
+        day_to_fetch = date.today() - timedelta(days=day_back)
+        csv_str = download_tns_csv(day_to_fetch)
+        named_targets = process_csv(csv_str)
 
-    for tns_target in named_targets:
-        matching_targets = Target.objects.all().filter(
-            name__in=tns_target['internal_names'].replace(' ', '').split(',')
-        ).exclude(
-            targetlist__name='Uninteresting'
-        )
-        for target in matching_targets:
-            logger.info('Adding TNS classification and names to ' + str(target))
-            extras = {}
-            names = [tns_target['name']]
-            if tns_target.get('type'):
-                extras['classification'] = tns_target['type']
-                if 'SN' in tns_target['type'].upper():
-                    move_to_uninteresting(target)
-            target.modified = timezone.now()
-            target.save(extras=extras, names=names)
+        for tns_target in named_targets:
+            matching_targets = (
+                Target.objects.all()
+                .filter(
+                    name__in=tns_target['internal_names'].replace(' ', '').split(',')
+                )
+                .exclude(targetlist__name='Uninteresting')
+            )
+            for target in matching_targets:
+                logger.info('Adding TNS classification and names to ' + str(target))
+                extras = {}
+                names = [tns_target['name']]
+                if tns_target.get('type'):
+                    extras['classification'] = tns_target['type']
+                    if 'SN' in tns_target['type'].upper():
+                        move_to_uninteresting(target)
+                target.modified = timezone.now()
+                target.save(extras=extras, names=names)
